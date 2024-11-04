@@ -69,14 +69,16 @@ In this project, I created a game similar to TypeRacer, where users can test the
 
 3. **Typing the Words**:
    - After the countdown, the RGB LED will turn green, and a word will be displayed in the terminal.
-   - Type the displayed word as quickly and accurately as possible.
+   - You have a limited time to type the displayed word based on the selected difficulty:
+     - **Easy**: 5 seconds
+     - **Medium**: 3 seconds
+     - **Hard**: 2 seconds
    - If you type the word correctly, the LED will stay green, and a new word will appear immediately.
-   - If you type the word incorrectly, the LED will turn red. You can correct your input by using the Backspace key.
+   - If you type the word incorrectly, the LED will turn red. You can correct your input by using the Backspace key to delete characters and retype the word.
 
 4. **Ending the Game**:
-   - The game will continue for 30 seconds, with new words appearing at intervals determined by the difficulty level.
+   - The game will continue for a total of 30 seconds, with new words appearing at intervals determined by the difficulty level.
    - At the end of the round, your score (the number of correctly typed words) will be displayed in the terminal.
    - You can stop the game at any time by pressing the start/stop button.
 
 5. **Enjoy the Challenge**: Test your typing speed and accuracy against the clock and see how many words you can type correctly!
-
