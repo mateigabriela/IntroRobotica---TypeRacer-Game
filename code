@@ -1,0 +1,191 @@
+#include <Arduino.h>
+
+#define LED_PIN_RED 6
+#define LED_PIN_GREEN 5
+#define LED_PIN_BLUE 4
+#define BUTTON_PIN_START 2
+#define BUTTON_PIN_MODE 3
+
+bool gameActive = false;
+bool startButtonPressed = false;
+bool modeButtonPressed = false;
+unsigned long roundStartTime = 0;
+unsigned long wordStartTime = 0;
+int scoreCount = 0;
+
+unsigned long lastModeChangeTime = 0;
+const unsigned long debounceDelay = 300;
+
+enum Level { LEVEL_EASY, LEVEL_MEDIUM, LEVEL_HARD };
+Level currentLevel = LEVEL_EASY;
+unsigned long wordDuration = 7000;
+
+const char* sneakerWords[] = {
+    "the", "quick", "brown", "fox", "jumps", "over", "lazy", "dog", "hello", "world",
+    "type", "fast", "keyboard", "mouse", "computer", "screen", "game", "play", "score", "win",
+    "text", "input", "output", "function", "program", "variable", "syntax", "error", "debug", "code",
+    "loop", "array", "string", "object", "class", "method", "null", "boolean", "integer", "float",
+    "char", "if", "else", "while", "for", "return", "break", "continue", "switch", "case",
+    "default", "print", "scan", "read", "write", "open", "close", "save", "load", "exit"
+};
+const int wordPoolSize = sizeof(sneakerWords) / sizeof(sneakerWords[0]);
+String targetWord = "";
+String playerInput = "";
+
+void setColor(int red, int green, int blue) {
+    analogWrite(LED_PIN_RED, red);
+    analogWrite(LED_PIN_GREEN, green);
+    analogWrite(LED_PIN_BLUE, blue);
+}
+
+String pickRandomWord() {
+    return sneakerWords[random(0, wordPoolSize)];
+}
+
+void initiateRound() {
+    gameActive = true;
+    roundStartTime = millis();
+    scoreCount = 0;
+    playerInput = "";
+
+    for (int i = 3; i > 0; i--) {
+        setColor(255, 255, 255);
+        delay(500);
+        setColor(0, 0, 0);
+        delay(500);
+        Serial.println(i);
+    }
+
+    Serial.println("Round begins!");
+    setColor(0, 255, 0);
+    
+    targetWord = pickRandomWord();
+    wordStartTime = millis();
+    Serial.print("Word: ");
+    Serial.println(targetWord);
+}
+
+void concludeRound() {
+    gameActive = false;
+    setColor(255, 255, 255);
+    Serial.print("Game over! Words matched: ");
+    Serial.println(scoreCount);
+}
+
+void toggleDifficultyLevel() {
+    if (gameActive) return;
+
+    if (millis() - lastModeChangeTime > debounceDelay) {
+        currentLevel = static_cast<Level>((currentLevel + 1) % 3);
+
+        switch (currentLevel) {
+            case LEVEL_EASY:
+                wordDuration = 7000;
+                Serial.println("Easy mode selected!");
+                break;
+            case LEVEL_MEDIUM:
+                wordDuration = 5000;
+                Serial.println("Medium mode selected!");
+                break;
+            case LEVEL_HARD:
+                wordDuration = 2000;
+                Serial.println("Hard mode selected!");
+                break;
+        }
+        lastModeChangeTime = millis();
+    }
+}
+
+bool isCorrectInput(const String& input) {
+    return input.equals(targetWord);
+}
+
+void setup() {
+    pinMode(LED_PIN_RED, OUTPUT);
+    pinMode(LED_PIN_GREEN, OUTPUT);
+    pinMode(LED_PIN_BLUE, OUTPUT);
+    pinMode(BUTTON_PIN_START, INPUT_PULLUP);
+    pinMode(BUTTON_PIN_MODE, INPUT_PULLUP);
+    Serial.begin(9600);
+    setColor(255, 255, 255);
+    Serial.println("Initial mode: Easy");
+}
+
+void loop() {
+    if (digitalRead(BUTTON_PIN_START) == LOW) {
+        if (!startButtonPressed && millis() - lastModeChangeTime > debounceDelay) {
+            lastModeChangeTime = millis();
+            startButtonPressed = true;
+
+            if (!gameActive) {
+                initiateRound();
+            } else {
+                concludeRound();
+            }
+        }
+    } else {
+        startButtonPressed = false;
+    }
+
+    if (digitalRead(BUTTON_PIN_MODE) == LOW) {
+        if (!modeButtonPressed) {
+            modeButtonPressed = true;
+            toggleDifficultyLevel();
+        }
+    } else {
+        modeButtonPressed = false;
+    }
+
+    if (gameActive) {
+        if ((millis() - roundStartTime) > 30000) {
+            concludeRound();
+        } else {
+            if (millis() - wordStartTime > wordDuration) {
+                targetWord = pickRandomWord();
+                wordStartTime = millis();
+                playerInput = ""; 
+                Serial.print("\nWord: ");
+                Serial.println(targetWord);
+                setColor(0, 255, 0);
+            }
+
+            while (Serial.available() > 0) {
+                char ch = Serial.read();
+                if (ch == '\n') {
+                    playerInput.trim();
+                    Serial.print("Entered word: ");
+                    Serial.println(playerInput);
+
+                    if (isCorrectInput(playerInput)) {
+                        scoreCount++;
+                        Serial.println("Correct!");
+                        setColor(0, 255, 0);
+                        targetWord = pickRandomWord();
+                        Serial.print("Word: ");
+                        Serial.println(targetWord);
+                        wordStartTime = millis();
+                        playerInput = "";
+                    } else {
+                        setColor(255, 0, 0);
+                        Serial.println("Incorrect!");
+                    }
+                } else if (ch == 8 || ch == 127) {
+                    if (playerInput.length() > 0) {
+                        playerInput.remove(playerInput.length() - 1);
+                        Serial.print("\b \b");
+                    }
+                } else {
+                    playerInput += ch;
+
+                    if (playerInput.length() > targetWord.length() || 
+                        playerInput.charAt(playerInput.length() - 1) != targetWord.charAt(playerInput.length() - 1)) {
+                        setColor(255, 0, 0);
+                    } else {
+                        setColor(0, 255, 0);
+                    }
+                    Serial.print(ch);
+                }
+            }
+        }
+    }
+}
