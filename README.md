@@ -23,25 +23,17 @@ In this project, I created a game similar to TypeRacer, where users can test the
 
 ## Physical Setup
 ![Physical Setup 1](./imagini/poza1_trg.jpeg)
-![Physical Setup 2](./imagini/poza2_trg.jpeg))
-![Physical Setup 3](./imagini/poza3_trg.jpeg))
-![Physical Setup 4](./imagini/poza4_trg.jpeg))
-![Physical Setup 4](./imagini/poza5_trg.jpeg))
+![Physical Setup 2](./imagini/poza2_trg.jpeg)
+![Physical Setup 3](./imagini/poza3_trg.jpeg)
+![Physical Setup 4](./imagini/poza4_trg.jpeg)
+![Physical Setup 4](./imagini/poza5_trg.jpeg)
 
 ## Video Demonstration of the Physical Setup
 [Video Demonstration](https://youtube.com/shorts/4CTRUkjRXb0?feature=share)
 
 ## Code Functions Overview
 
-### `setup()`
-- This function runs once when the program starts.
-- It initializes the RGB LED and button pins.
-- It sets the RGB LED to white to indicate that the game is in a ready state.
-
-### `loop()`
-- The main function that runs repeatedly after `setup()`.
-- It checks the state of the buttons and updates the game status accordingly.
-- It manages the countdown timer and the game round.
+![CODE](/code)
 
 ### `startGame()`
 - Initiates a new game round.
