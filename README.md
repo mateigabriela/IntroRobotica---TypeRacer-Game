@@ -17,6 +17,17 @@ In this project, I created a game similar to TypeRacer, where users can test the
 - **Breadboard**
 - **Jumper wires**
 
+## Hardware Setup
+
+1. **RGB LED Pins**
+   - Red: Connected to `LED_PIN_RED` (Pin 6 on Arduino)
+   - Green: Connected to `LED_PIN_GREEN` (Pin 5 on Arduino)
+   - Blue: Connected to `LED_PIN_BLUE` (Pin 4 on Arduino)
+
+2. **Buttons**
+   - Start Button: Connected to `BUTTON_PIN_START` (Pin 2 on Arduino) - starts and stops the game round.
+   - Mode Button: Connected to `BUTTON_PIN_MODE` (Pin 3 on Arduino) - toggles the difficulty level.
+
 ## Wiring Diagram
 ![Wiring Diagram](./imagini/schema_circuit_trg.PNG)
 
@@ -34,30 +45,66 @@ In this project, I created a game similar to TypeRacer, where users can test the
 
 [This is the code.](/code)
 
-### `startGame()`
-- Initiates a new game round.
-- Handles the countdown display via the RGB LED, flashing it for 3 seconds.
-- Starts the word generation process based on the selected difficulty.
 
-### `generateWord()`
-- Randomly selects a word from a predefined dictionary.
-- Displays the chosen word in the terminal for the player to type.
-- Tracks the time remaining for the round.
+### `void setColor(int red, int green, int blue)`
 
-### `checkInput()`
-- Compares the player's input with the displayed word.
-- If the input matches, it changes the RGB LED to green and immediately generates a new word.
-- If the input does not match, it changes the LED to red and allows the player to correct their input.
+Sets the RGB LED color based on the values for red, green, and blue brightness levels (parameters `red`, `green`, `blue` range from 0 to 255).
 
-### `setDifficulty()`
-- Cycles through the difficulty levels (Easy, Medium, Hard).
-- Adjusts the speed at which words appear based on the selected difficulty.
-- Sends a message to the serial monitor to inform the user of the current difficulty.
+**Usage**: Used throughout the game to indicate different states, such as game start, correct input, and incorrect input.
 
-### `endGame()`
-- Concludes the game round after 30 seconds.
-- Displays the total number of correctly typed words in the terminal.
-- Resets the game state to allow for a new round.
+### `String pickRandomWord()`
+
+Picks a random word from the `sneakerWords` list, used to generate the words the player needs to type.
+
+**Usage**: Called at the beginning of each new word to provide a random word for the player.
+
+### `void initiateRound()`
+
+Initializes a new game round, including:
+   - Setting game state variables to begin the game (`gameActive` set to `true`)
+   - Displaying a countdown on the Serial Monitor and flashing the LED
+   - Setting a new word and starting its countdown timer
+
+**Usage**: Triggered when the game starts (start button is pressed).
+
+### `void concludeRound()`
+
+Stops the game, displaying the final score on the Serial Monitor and showing the number of correctly typed words.
+
+**Usage**: Triggered when the round ends, either by time expiration or pressing the start button again.
+
+### `void toggleDifficultyLevel()`
+
+Cycles the difficulty level between `EASY`, `MEDIUM`, and `HARD`. Each level has a different word typing time limit:
+   - **Easy**: 7 seconds
+   - **Medium**: 5 seconds
+   - **Hard**: 2 seconds
+
+This function is only called if the game is inactive and the debounce delay has passed to avoid rapid toggling.
+
+**Usage**: The player can press the mode button to change difficulty before the game starts.
+
+### `bool isCorrectInput(const String& input)`
+
+Checks if the player's typed input (`input`) matches the current word (`targetWord`).
+
+**Usage**: Called whenever the player enters a word to verify if it matches the target word.
+
+### `void setup()`
+
+Configures pin modes, initializes Serial communication, and sets the RGB LED to white to indicate the game is ready. Displays an initial message and selected difficulty level on the Serial Monitor.
+
+**Usage**: Runs once when the Arduino program starts.
+
+### `void loop()`
+
+The main game loop, which:
+   - Checks `start` and `mode` button states to start/stop the game and toggle difficulty.
+   - Ends the round when the time limit expires and updates the word according to the difficulty level.
+   - Reads player input, validating if the input matches the current word and updating the score.
+
+**Usage**: Controls the game flow, handles game state changes, and manages user interaction.
+
 
 ## How to Play
 1. **Setup**: Assemble the circuit according to the wiring diagram and upload the provided Arduino code to your Arduino UNO.
