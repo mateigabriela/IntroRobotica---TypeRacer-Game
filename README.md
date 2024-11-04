@@ -1,4 +1,3 @@
-# IntroRobotica---TypeRacer-Game
 # TypeRacer Game
 
 ## Task Description
@@ -33,7 +32,7 @@ In this project, I created a game similar to TypeRacer, where users can test the
 
 ## Code Functions Overview
 
-![CODE](/code)
+[This is the code.](/code)
 
 ### `startGame()`
 - Initiates a new game round.
